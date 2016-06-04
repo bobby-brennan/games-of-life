@@ -1,0 +1,99 @@
+<html>
+<head>
+  <script src="jquery.min.js"></script>
+</head>
+<body>
+<svg width="500" height="500">
+  <rect fill="blue" x="20" y="20" width="10" height="10">
+  </rect>
+</svg>
+<script>
+
+var BOX_SIZE = 500;
+var CELL_SIZE = 10;
+var CELLS_PER_ROW = CELLS_PER_COL = BOX_SIZE / CELL_SIZE;
+
+var cells = [];
+for (var i = 0; i < CELLS_PER_ROW; ++i) {
+  var row = [];
+  cells.push(row)
+  for (var j = 0; j < CELLS_PER_ROW; ++j) {
+    row.push({on: Math.random() < .5 ? true : false})
+    var cellID = i + ':' + j;
+    var xLoc = i * CELL_SIZE;
+    var yLoc = j * CELL_SIZE;
+  }
+}
+
+function drawCells() {
+  $('svg').html('')
+  var newContent = '';
+  cells.forEach(function(row, rowIdx) {
+    row.forEach(function(cell, colIdx) {
+      if (cell.on) {
+        xLoc = colIdx * CELL_SIZE;
+        yLoc = rowIdx * CELL_SIZE;
+        newContent += '<rect x="' + xLoc + '" y="' + yLoc + '" width="10" height="10" fill="blue"></rect>';
+      }
+    })
+  })
+  $('svg').html(newContent);
+}
+drawCells();
+
+function countNeighbors(row, col) {
+  var prevRow = row - 1;
+  var nextRow = row + 1;
+  var prevCol = col - 1;
+  var nextCol = col + 1;
+  if (prevRow === -1) prevRow = cells.length - 1;
+  if (prevCol === -1) prevCol = cells[0].length - 1;
+  if (nextRow === cells.length) nextRow = 0;
+  if (nextCol === cells[0].length) nextCol = 0;
+  targets = [
+    [prevRow, prevCol],
+    [prevRow, col],
+    [prevRow, nextCol],
+    [row, prevCol],
+    [row, nextCol],
+    [nextRow, prevCol],
+    [nextRow, col],
+    [nextRow, nextCol],
+  ]
+  return targets.reduce(function(val, indicies) {
+    next = cells[indicies[0]][indicies[1]]
+    if (next.on) return val + 1
+    else return val
+  }, 0)
+}
+
+function makeStep() {
+  changed = 0;
+
+  counts = cells.map(function(row, rowIdx) {
+    return row.map(function(cell, colIdx) {
+      return countNeighbors(rowIdx, colIdx);
+    })
+  })
+
+  cells.forEach(function(row, rowIdx) {
+    row.forEach(function(cell, colIdx) {
+      var neighbors = counts[rowIdx][colIdx];
+      if (cell.on && (neighbors < 2 || neighbors > 3)) {
+        cell.on = false;
+        ++changed;
+      } else if (!cell.on && neighbors === 3) {
+        cell.on = true;
+        ++changed;
+      }
+    })
+  })
+  console.log('changed', changed);
+  drawCells();
+}
+
+setInterval(makeStep, 100);
+
+</script>
+</body>
+</html>
