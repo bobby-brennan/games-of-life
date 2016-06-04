@@ -7,19 +7,34 @@
 </svg>
 
 <label>Speed</label>
-<input id="Speed" type="number" value="100" onchange="setSpeed()">
+<input id="Speed" type="number" value="250" onchange="setSpeed()">
 <script>
 
 var BOX_SIZE = 500;
-var CELL_SIZE = 10;
+var CELL_SIZE = 5;
 var CELLS_PER_ROW = CELLS_PER_COL = BOX_SIZE / CELL_SIZE;
+
+var populations = [{
+  name: "predator",
+  color: "red",
+}, {
+  name: "prey",
+  color: "green",
+}];
+
+function choosePopulation() {
+  var rand = Math.random();
+  if (rand < .1) return populations[0];
+  else return populations[1];
+}
 
 var cells = [];
 for (var i = 0; i < CELLS_PER_ROW; ++i) {
   var row = [];
   cells.push(row)
   for (var j = 0; j < CELLS_PER_ROW; ++j) {
-    row.push({on: Math.random() < .5 ? true : false})
+    population = choosePopulation();
+    row.push({on: Math.random() < .1 ? true : false, population: population})
     var cellID = i + ':' + j;
     var xLoc = i * CELL_SIZE;
     var yLoc = j * CELL_SIZE;
@@ -34,7 +49,7 @@ function drawCells() {
       if (cell.on) {
         xLoc = colIdx * CELL_SIZE;
         yLoc = rowIdx * CELL_SIZE;
-        newContent += '<rect x="' + xLoc + '" y="' + yLoc + '" width="10" height="10" fill="blue"></rect>';
+        newContent += '<rect x="' + xLoc + '" y="' + yLoc + '" width="10" height="10" fill="' + cell.population.color + '"></rect>';
       }
     })
   })
@@ -61,25 +76,25 @@ function countNeighbors(row, col) {
     [nextRow, col],
     [nextRow, nextCol],
   ]
-  return targets.reduce(function(val, indicies) {
-    next = cells[indicies[0]][indicies[1]]
-    if (next.on) return val + 1
-    else return val
-  }, 0)
+  return targets.map(function(indicies) {
+    return cells[indicies[0]][indicies[1]];
+  }).reduce(function(val, cell) {
+    if (cell.on) {
+      val[cell.population.name]++;
+    }
+    return val;
+  }, {predator: 0, prey: 0})
 }
 
 function makeStep() {
-  changed = 0;
+  var newCells = 0, deadCells = 0;
 
   counts = cells.map(function(row, rowIdx) {
     return row.map(function(cell, colIdx) {
       return countNeighbors(rowIdx, colIdx);
     })
   })
-
-  cells.forEach(function(row, rowIdx) {
-    row.forEach(function(cell, colIdx) {
-      var neighbors = counts[rowIdx][colIdx];
+/*
       if (cell.on && (neighbors < 2 || neighbors > 3)) {
         cell.on = false;
         ++changed;
@@ -87,13 +102,40 @@ function makeStep() {
         cell.on = true;
         ++changed;
       }
+*/
+  cells.forEach(function(row, rowIdx) {
+    row.forEach(function(cell, colIdx) {
+      var neighbors = counts[rowIdx][colIdx];
+      if (cell.on) {
+        if (cell.population.name === 'prey') {
+          if (neighbors.predator > 0) {
+            cell.on = false;
+            ++deadCells;
+          }
+        } else if (cell.population.name === 'predator') {
+          if (neighbors.predator > 3 || neighbors.prey < 1) {
+            cell.on = false;
+            ++deadCells;
+          }
+        }
+      } else {
+        if (neighbors.prey === 3 || neighbors.prey === 2) {
+          cell.on = true;
+          cell.population = populations[1];
+          ++newCells;
+        } else if (neighbors.predator === 2) {
+          cell.on = true;
+          cell.population = populations[0];
+          ++newCells;
+        }
+      }
     })
   })
-  console.log('changed', changed);
+  console.log('new', newCells, 'dead', deadCells);
   drawCells();
 }
 
-drawInterval = setInterval(makeStep, 100);
+drawInterval = setInterval(makeStep, 250);
 function setSpeed() {
   clearInterval(drawInterval);
   drawInterval = setInterval(makeStep, $('#Speed').val());
