@@ -73,15 +73,9 @@ function makeCells() {
   })
 }
 
-var step = 0;
-
 game.doStep = function() {
-  step = (step + 1) % 2;
-  if (step % 2 === 1) {
-    killCells();
-  } else {
-    makeCells();
-  }
+  killCells();
+  makeCells();
 }
 
 games.push(game);

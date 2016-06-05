@@ -1,5 +1,5 @@
 var SVG_SIZE = 500;
-var CELL_SIZE = 5;
+var CELL_SIZE = 10;
 var CELLS_PER_ROW = CELLS_PER_COL = SVG_SIZE / CELL_SIZE;
 
 var games = [];
