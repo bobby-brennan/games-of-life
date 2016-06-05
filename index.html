@@ -24,7 +24,7 @@ var populations = [{
 
 function choosePopulation() {
   var rand = Math.random();
-  if (rand < .1) return populations[0];
+  if (rand < .5) return populations[0];
   else return populations[1];
 }
 
@@ -49,7 +49,12 @@ function drawCells() {
       if (cell.on) {
         xLoc = colIdx * CELL_SIZE;
         yLoc = rowIdx * CELL_SIZE;
-        newContent += '<rect x="' + xLoc + '" y="' + yLoc + '" width="10" height="10" fill="' + cell.population.color + '"></rect>';
+        newContent += '<rect x="' + xLoc +
+            '" y="' + yLoc +
+            '" width="' + CELL_SIZE +
+            '" height="' + CELL_SIZE +
+            '" fill="' + cell.population.color +
+            '"></rect>';
       }
     })
   })
@@ -83,26 +88,20 @@ function countNeighbors(row, col) {
       val[cell.population.name]++;
     }
     return val;
-  }, {predator: 0, prey: 0})
+  }, {predator: 0, prey: 0});
 }
 
 function makeStep() {
-  var newCells = 0, deadCells = 0;
+  killCells();
+  makeCells();
+}
 
+function killCells() {
   counts = cells.map(function(row, rowIdx) {
     return row.map(function(cell, colIdx) {
       return countNeighbors(rowIdx, colIdx);
     })
   })
-/*
-      if (cell.on && (neighbors < 2 || neighbors > 3)) {
-        cell.on = false;
-        ++changed;
-      } else if (!cell.on && neighbors === 3) {
-        cell.on = true;
-        ++changed;
-      }
-*/
   cells.forEach(function(row, rowIdx) {
     row.forEach(function(cell, colIdx) {
       var neighbors = counts[rowIdx][colIdx];
@@ -110,28 +109,37 @@ function makeStep() {
         if (cell.population.name === 'prey') {
           if (neighbors.predator > 0) {
             cell.on = false;
-            ++deadCells;
           }
         } else if (cell.population.name === 'predator') {
-          if (neighbors.predator > 3 || neighbors.prey < 1) {
+          if (neighbors.predator === 0 || neighbors.predator > 3 || neighbors.prey < 1) {
             cell.on = false;
-            ++deadCells;
           }
-        }
-      } else {
-        if (neighbors.prey === 3 || neighbors.prey === 2) {
-          cell.on = true;
-          cell.population = populations[1];
-          ++newCells;
-        } else if (neighbors.predator === 2) {
-          cell.on = true;
-          cell.population = populations[0];
-          ++newCells;
         }
       }
     })
   })
-  console.log('new', newCells, 'dead', deadCells);
+}
+
+function makeCells() {
+  counts = cells.map(function(row, rowIdx) {
+    return row.map(function(cell, colIdx) {
+      return countNeighbors(rowIdx, colIdx);
+    })
+  })
+  cells.forEach(function(row, rowIdx) {
+    row.forEach(function(cell, colIdx) {
+      var neighbors = counts[rowIdx][colIdx];
+      if (!cell.on) {
+        if (neighbors.predator === 2 || neighbors.predator === 3) {
+          cell.on = true;
+          cell.population = populations[0];
+        } else if (neighbors.prey >= 2) {
+          cell.on = true;
+          cell.population = populations[1];
+        }
+      }
+    })
+  })
   drawCells();
 }
 
