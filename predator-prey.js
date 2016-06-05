@@ -1,19 +1,6 @@
-var SVG_SIZE = 500;
-var CELL_SIZE = 5;
-var CELLS_PER_ROW = CELLS_PER_COL = SVG_SIZE / CELL_SIZE;
+(function() {
 var ALIVE_RATIO = .5;
 var PREDATOR_RATIO = .5;
-
-var drawInterval = null;
-
-$(document).ready(function() {
-  $('#Container').append('<svg height="' + SVG_SIZE + '" width="' + SVG_SIZE + '"></svg>')
-  drawInterval = setInterval(makeStep, 250);
-})
-function setSpeed() {
-  clearInterval(drawInterval);
-  drawInterval = setInterval(makeStep, $('#Speed').val());
-}
 
 var populations = [{
   name: "predator",
@@ -92,11 +79,6 @@ function countNeighbors(row, col) {
   }, {predator: 0, prey: 0});
 }
 
-function makeStep() {
-  killCells();
-  makeCells();
-}
-
 function killCells() {
   counts = cells.map(function(row, rowIdx) {
     return row.map(function(cell, colIdx) {
@@ -144,4 +126,12 @@ function makeCells() {
   drawCells();
 }
 
+games.push({
+  name: 'Predator/Prey',
+  doStep: function() {
+    killCells();
+    makeCells();
+  }
+});
 
+})();
