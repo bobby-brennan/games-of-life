@@ -1,15 +1,31 @@
 <html>
 <head>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
   <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
   <script src="game.js"></script>
   <script src="conway.js"></script>
   <script src="predator-prey.js"></script>
 </head>
-<body>
-<div id="Container"></div>
 
-<label>Step (ms)</label>
-<input id="Speed" type="number" value="250" onchange="setSpeed()">
-<div id="Games"></div>
+<body>
+  <div class="container">
+    <div id="Container"></div>
+
+    <label>Step (ms)</label>
+    <input id="Speed" type="number" value="250" onchange="play()">
+    <div class="btn-list">
+      <a id="PauseButton" class="btn btn-default" onclick="pause()">
+        <span class="glyphicon glyphicon-pause"></span>
+      </a>
+      <a id="PlayButton" class="btn btn-default" onclick="play()">
+        <span class="glyphicon glyphicon-play"></span>
+      </a>
+      <a id="RestartButton" class="btn btn-default" onclick="restart()">
+        <span class="glyphicon glyphicon-repeat"></span>
+      </a>
+    </div>
+    <div id="Games"></div>
+  </div>
 </body>
 </html>
