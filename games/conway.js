@@ -2,24 +2,29 @@
 
 var ALIVE_RATIO = .2;
 
-var population = {
-  name: 'cell',
-  color: "blue",
+var game = {
+  name: "Conway",
+  populations: [{
+    name: 'cell',
+    color: "blue",
+  }],
 }
 
-var cells = [];
-for (var i = 0; i < CELLS_PER_ROW; ++i) {
-  var row = [];
-  cells.push(row)
-  for (var j = 0; j < CELLS_PER_COL; ++j) {
-    row.push({on: Math.random() < ALIVE_RATIO ? true : false, population: population})
+game.reset = function() {
+  game.cells = [];
+  for (var i = 0; i < CELLS_PER_ROW; ++i) {
+    var row = [];
+    game.cells.push(row)
+    for (var j = 0; j < CELLS_PER_COL; ++j) {
+      row.push({on: Math.random() < ALIVE_RATIO ? true : false, population: game.populations[0]})
+    }
   }
 }
 
 
-function doStep() {
-  var counts = getNeighborCounts(cells);
-  cells.forEach(function(row, rowIdx) {
+game.doStep = function() {
+  var counts = getNeighborCounts(game.cells);
+  game.cells.forEach(function(row, rowIdx) {
     row.forEach(function(cell, colIdx) {
       var neighbors = counts[rowIdx][colIdx];
       if (cell.on) {
@@ -35,11 +40,6 @@ function doStep() {
   })
 }
 
-games.push({
-  name: "Conway",
-  doStep: doStep,
-  cells: cells,
-  populations: [population],
-})
+games.push(game);
 
 })();

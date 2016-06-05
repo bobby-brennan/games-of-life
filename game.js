@@ -11,7 +11,7 @@ function doStep() {
   }
   lastLength = games.length;
   if (!games.length) return;
-  if (!games.active) games.active = games[0];
+  if (!games.active) setGame(games[0]);
   games.active.doStep();
   drawCells(games.active.cells);
 }
@@ -107,11 +107,13 @@ function pause() {
 }
 
 function restart() {
-  play();
+  games.active.reset();
+  drawCells(games.active.cells);
 }
 
 function setGame(game) {
   games.active = game;
+  games.active.reset();
   restart();
 }
 
