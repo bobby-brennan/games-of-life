@@ -20,7 +20,7 @@ var cells = [];
 for (var i = 0; i < CELLS_PER_ROW; ++i) {
   var row = [];
   cells.push(row)
-  for (var j = 0; j < CELLS_PER_ROW; ++j) {
+  for (var j = 0; j < CELLS_PER_COL; ++j) {
     population = choosePopulation();
     row.push({on: Math.random() < ALIVE_RATIO ? true : false, population: population})
     var cellID = i + ':' + j;
@@ -29,62 +29,8 @@ for (var i = 0; i < CELLS_PER_ROW; ++i) {
   }
 }
 
-function drawCells() {
-  $('svg').html('')
-  var newContent = '';
-  cells.forEach(function(row, rowIdx) {
-    row.forEach(function(cell, colIdx) {
-      if (cell.on) {
-        xLoc = colIdx * CELL_SIZE;
-        yLoc = rowIdx * CELL_SIZE;
-        newContent += '<rect x="' + xLoc +
-            '" y="' + yLoc +
-            '" width="' + CELL_SIZE +
-            '" height="' + CELL_SIZE +
-            '" fill="' + cell.population.color +
-            '"></rect>';
-      }
-    })
-  })
-  $('svg').html(newContent);
-}
-drawCells();
-
-function countNeighbors(row, col) {
-  var prevRow = row - 1;
-  var nextRow = row + 1;
-  var prevCol = col - 1;
-  var nextCol = col + 1;
-  if (prevRow === -1) prevRow = cells.length - 1;
-  if (prevCol === -1) prevCol = cells[0].length - 1;
-  if (nextRow === cells.length) nextRow = 0;
-  if (nextCol === cells[0].length) nextCol = 0;
-  targets = [
-    [prevRow, prevCol],
-    [prevRow, col],
-    [prevRow, nextCol],
-    [row, prevCol],
-    [row, nextCol],
-    [nextRow, prevCol],
-    [nextRow, col],
-    [nextRow, nextCol],
-  ]
-  return targets.map(function(indicies) {
-    return cells[indicies[0]][indicies[1]];
-  }).reduce(function(val, cell) {
-    if (cell.on) {
-      val[cell.population.name]++;
-    }
-    return val;
-  }, {predator: 0, prey: 0});
-}
-
 function killCells() {
-  counts = cells.map(function(row, rowIdx) {
-    return row.map(function(cell, colIdx) {
-      return countNeighbors(rowIdx, colIdx);
-    })
-  })
+  counts = getNeighborCounts(cells);
   cells.forEach(function(row, rowIdx) {
     row.forEach(function(cell, colIdx) {
       var neighbors = counts[rowIdx][colIdx];
@@ -104,11 +50,7 @@ function killCells() {
 }
 
 function makeCells() {
-  counts = cells.map(function(row, rowIdx) {
-    return row.map(function(cell, colIdx) {
-      return countNeighbors(rowIdx, colIdx);
-    })
-  })
+  counts = getNeighborCounts(cells);
   cells.forEach(function(row, rowIdx) {
     row.forEach(function(cell, colIdx) {
       var neighbors = counts[rowIdx][colIdx];
@@ -123,11 +65,12 @@ function makeCells() {
       }
     })
   })
-  drawCells();
 }
 
 games.push({
   name: 'Predator/Prey',
+  cells: cells,
+  populations: populations,
   doStep: function() {
     killCells();
     makeCells();
