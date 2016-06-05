@@ -1,6 +1,7 @@
-var SVG_SIZE = 500;
-var CELL_SIZE = 10;
-var CELLS_PER_ROW = CELLS_PER_COL = SVG_SIZE / CELL_SIZE;
+var settings = {
+  SVG_SIZE: 500,
+  CELL_SIZE: 10,
+}
 
 var games = [];
 
@@ -23,18 +24,39 @@ function redrawGames() {
   });
 }
 
+function initCells() {
+  var CELLS_PER_ROW = CELLS_PER_COL = settings.SVG_SIZE / settings.CELL_SIZE;
+  var cells = [];
+  for (var i = 0; i < CELLS_PER_ROW; ++i) {
+    var row = [];
+    cells.push(row)
+    for (var j = 0; j < CELLS_PER_COL; ++j) {
+      row.push(null);
+    }
+  }
+  return cells;
+}
+
+function iterateCells(cells, cb) {
+  cells.forEach(function(row, rowIdx) {
+    row.forEach(function(cell, colIdx) {
+      cb(cell, rowIdx, colIdx);
+    });
+  });
+}
+
 function drawCells(cells) {
   $('svg').html('')
   var newContent = '';
   cells.forEach(function(row, rowIdx) {
     row.forEach(function(cell, colIdx) {
       if (cell.on) {
-        xLoc = colIdx * CELL_SIZE;
-        yLoc = rowIdx * CELL_SIZE;
+        xLoc = colIdx * settings.CELL_SIZE;
+        yLoc = rowIdx * settings.CELL_SIZE;
         newContent += '<rect x="' + xLoc +
             '" y="' + yLoc +
-            '" width="' + CELL_SIZE +
-            '" height="' + CELL_SIZE +
+            '" width="' + settings.CELL_SIZE +
+            '" height="' + settings.CELL_SIZE +
             '" fill="' + cell.population.color +
             '"></rect>';
       }
@@ -88,7 +110,7 @@ function getNeighborCounts(cells) {
 
 var drawInterval = null;
 $(document).ready(function() {
-  $('#Container').append('<svg height="' + SVG_SIZE + '" width="' + SVG_SIZE + '"></svg>');
+  $('#Container').append('<svg height="' + settings.SVG_SIZE + '" width="' + settings.SVG_SIZE + '"></svg>');
   play();
 })
 

@@ -11,16 +11,14 @@ var game = {
 }
 
 game.reset = function() {
-  game.cells = [];
-  for (var i = 0; i < CELLS_PER_ROW; ++i) {
-    var row = [];
-    game.cells.push(row)
-    for (var j = 0; j < CELLS_PER_COL; ++j) {
-      row.push({on: Math.random() < ALIVE_RATIO ? true : false, population: game.populations[0]})
-    }
-  }
+  game.cells = initCells();
+  iterateCells(game.cells, function(cell, rowIdx, colIdx) {
+    game.cells[rowIdx][colIdx] = {
+      on: Math.random() < ALIVE_RATIO ? true : false,
+      population: game.populations[0],
+    };
+  });
 }
-
 
 game.doStep = function() {
   var counts = getNeighborCounts(game.cells);
