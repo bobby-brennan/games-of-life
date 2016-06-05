@@ -5,16 +5,13 @@ var settings = {
 
 var games = [];
 
-var lastLength = 0;
 function doStep() {
-  if (lastLength !== games.length) {
-    redrawGames();
-  }
-  lastLength = games.length;
-  if (!games.length) return;
-  if (!games.active) setGame(games[0]);
   games.active.doStep();
   drawCells(games.active.cells);
+}
+
+function redrawGame() {
+  $('#Container').html('<svg height="' + settings.SVG_SIZE + '" width="' + settings.SVG_SIZE + '"></svg>');
 }
 
 function redrawGames() {
@@ -22,6 +19,24 @@ function redrawGames() {
   games.forEach(function(game, idx) {
     $('#Games').append('<a href="#" onclick="setGame(games[' + idx + '])">' + game.name + '</a><br>');
   });
+}
+
+function redrawSettings() {
+  $('#Settings').html('');
+  for (var setting in settings) {
+    var html = '<div class="form-group"><label>' + setting + '</label>';
+    html += '<input type="number" name="' + setting +
+        '" onchange="updateSettings()" value="' + settings[setting] + '">';
+    html += '</div>'
+    $('#Settings').append(html);
+  }
+}
+
+function updateSettings() {
+  for (var setting in settings) {
+    settings[setting] = $('input[name="' + setting + '"]').val();
+  }
+  restart();
 }
 
 function initCells() {
@@ -110,7 +125,9 @@ function getNeighborCounts(cells) {
 
 var drawInterval = null;
 $(document).ready(function() {
-  $('#Container').append('<svg height="' + settings.SVG_SIZE + '" width="' + settings.SVG_SIZE + '"></svg>');
+  redrawSettings();
+  redrawGames();
+  restart();
   play();
 })
 
@@ -129,6 +146,8 @@ function pause() {
 }
 
 function restart() {
+  redrawGame();
+  if (!games.active) setGame(games[0]);
   games.active.reset();
   drawCells(games.active.cells);
 }
